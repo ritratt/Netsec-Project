@@ -1,0 +1,133 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+
+\title{Network Security Project Ideas}
+\author{Akshata Rao \\ Rituraj Satpute \\ Rohit Jamuar}
+
+\begin{document}
+\maketitle
+
+\section*{Introduction}
+
+The idea names chosen for the project are:
+\begin{enumerate}
+\item Safe Browsing Extenstions for Browsers.
+\item Extracting Malware Trends.
+\item An Android Malware.
+\end{enumerate}
+
+
+We have more than three ideas. The extra ideas being:
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item Certificate Transparency Using The Bitcoin Blockchain.
+\item Spam Generating Trojan.
+\end{enumerate}
+
+\section{Safe Browsing Extensions for Browsers}
+\label{sec:i1}
+
+\subsection{Central Idea}
+Build an extension that is able to 
+\begin{enumerate}
+\item Scan accessed webpage against a blacklist of URLs
+
+\item Scan accessed webpage HTML/script content to extract URL links. Evaluate the security of the website based on the URL links it hosts.
+
+\item Evaluate other possible data about the website that can be extracted to perform the same.
+
+\end{enumerate}
+
+\subsection{Novelty}
+
+There are already existing extensions such as AdBlock Plus or Google Safe Browsing built into web browsers. Although, they are restricted to deeming a website as insecure on the basis of its reputation alone, and not based on its content.
+
+\subsection{What do we intend to learn?}
+
+Even though there are similar established extensions out there, building such an extension by ourselves from scratch would help us learn about building security extensions in browsers, web security and blacklists.
+
+\subsection{Challenges}
+\begin{enumerate}
+\item Finding the scope of deeming a website harmful
+
+\item If the website is harmful and not blacklisted, I still need to download the content to scan it. How can I prevent the harm caused by downloading it?
+\end{enumerate}
+
+\subsection{References}
+
+\section{Extracting Malware Trends}
+\subsection{Central Idea}
+Build an automated system to analyze current malware trends via recently captured PCAPs. An automated system like this could really help in understanding:
+\begin{enumerate}
+\item which malwares are most prominent currently, 
+\item which (Alexa ranked) sites are actively being targeted, and 
+\item which ad-networks and / or countries serve as prevalent malware sources. 
+\end{enumerate}
+Furthermore, a system like this could be incorporated by ISPs and / or as a browser extension to prevent the underlying system from infection.
+
+\subsection{Novelty}
+Unlike most other malware analyzers, we intend to analyze PCAP dumps to derive trends. GTISC continually collects PCAPs, which could be employed for building this system. These PCAPs can then be systematically analyzed using WireShark's Python wrapper (pyreshark),for determining packets through which malwares are being served (i.e ones with PE / MZ in their header section). Once located, we can use this for collecting more details about the intermediate sites and the type of malware being served (through API calls to VirusTotal). We will maintain and update a list of malware serving sites (ad sites or otherwise) on a cloud service (Heroku, perhaps), which would be used by this system as a point of reference for operation.
+
+\section{An Android Malware}
+\subsection{Central Idea}
+We intend to create an android malware from scratch and infect a device using one or more of the above methods. There are plenty of malware out there and our malware will most likely end up doing something that has already been done, maybe in a less optimum manner. But the goal is to learn everything about malware from “feet up”. If possible, we will try to make the malware do something novel.
+
+\subsection{What we intend to learn}
+A malware has a wide range of aspects to it like its attack vector, the kind of vulnerability it harps on, the actual exploit, the cleanup process and so on. We intend to learn at least one of each one of these aspects and successfully implement from scratch. Building anything from scratch always grants the most deeper understanding. And if we intend on creating systems that thwart malware then we need to be thoroughly comfortable with how malware work end to end.
+
+\subsection{Challenges}
+\begin{enumerate}
+\item Modify existing APK and inject vulnerable code or,
+\item Create an APK from scratch with malicious code and install/execute on device.
+\item Effectively implementing an exploit which could be keylogging, data extraction, installing adware, rooting etc.
+\item Performing proper cleanup post exploitation to remove traces.
+\end{enumerate}
+
+\section{Certificate Transparency Using The Bitcoin Blockchain}
+\subsection{Central Idea}
+Researchers have always envisioned a decentralized approach to certificates, but none of them had the luxury of the Bitcoin Blockchain at their disposal [4]. Hopefully, its existence and features can be leveraged to produce a secure and decentralized approach to public key certificates.
+
+\subsection{Novelty}
+There are existing solutions to certificate transparency without a certificate authority like identity based encryption. However, our idea is novel because there is no single unforgeable database where all the public keys are stored. Moreover, the Blockchain suppports the following crucial functions as defined in [1]:
+\begin{enumerate}
+\item Insertion - insertion of a new certificate into the ledger.
+\item Revocation - revocation of an existing certificate.
+\item Absence - determine if a certificate for a given public key or an entity exists or not.
+\item Extension - to be able to prove that the ledger d at time t is an extension of the ledger d’ at time t’ < t (i.e. d is more recent.)
+\item Currency - proof that a certificate is current or not according to d at t.
+\end{enumerate}
+
+\subsection{Challenges}
+Apart from implementing the functions given above, there are the following two challenges:
+\begin{enumerate}
+\item If an attacker gains all the capabilities of a CA by compromising it then the attacker can, in no way, affect the validity of legitimate certificates that have already been issued.
+\item If an attacker gains all the capabilities of a CA then the attacker, in no way, should be able to issue new and valid certificates for existing entities who have already been issued a legitimate certificate.
+\end{enumerate}
+
+\subsection{References}
+
+\section{Spam Generating Trojan}
+\subsection{Central Idea}
+Build a browser extension/toolbar which is a trojan. The browser extension tracks user activity to find his most popular search results and browsing history. It also tracks the email addresses entered in forms/Auto-Fill etc. 
+The extension then sends this data of the accessed URLs and likely email addresses to a server. The central server extracts the web content of the URL, constructs a spam email message using this content to make the email attractive to the user. It also embeds links of malware links in the email. The email message is then sent to the email addresses collected.
+
+\subsection{Novelty}
+There exist sites like Google that evaluate the user browsing patterns for placing targeted ads. This idea is a twist to the concept. Existing technologies like AdBlock Plus use blacklists of known advertising and spyware sites to automatically block content from them. So it would not be able to block this.
+
+\subsection{Challenges}
+The efficacy of the trojan depends on
+\begin{enumerate}
+\item User must have installed the trojan
+
+\item Firewalls could potentially block the browser extension from contacting the central server, which would render it ineffective.
+
+\item The extension should be able to record the user browsing patterns.
+\end{enumerate}
+
+\subsection{References}
+\end{document}
