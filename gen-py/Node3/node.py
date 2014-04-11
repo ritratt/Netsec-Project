@@ -46,7 +46,7 @@ class NodeHandler:
 		print '------------------------------------------------------'
 		open("temp.pem", "wt").write(a)
 		tempCert=crypto.load_certificate(crypto.FILETYPE_PEM,open('temp.pem','rb').read())
-		system('mv %s.pem'%tempCert.get_subject().commonName)
+		system('mv temp.pem %s.pem'%tempCert.get_subject().commonName)
 		print "Received client's cert"
 		system('openssl verify -verbose -CAfile CA_cert.pem %s.pem'%tempCert.get_subject().commonName)
 		system('rm %s.pem'%tempCert.get_subject().commonName)
