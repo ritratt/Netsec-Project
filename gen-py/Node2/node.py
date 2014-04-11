@@ -27,7 +27,7 @@ def create_self_signed_cert(y):
     cert.get_subject().L = "ATL"
     cert.get_subject().O = "blah"
     cert.get_subject().OU = "blah"
-    cert.get_subject().CN = "CA"
+    cert.get_subject().CN = y
     cert.set_serial_number(1000)
     cert.gmtime_adj_notBefore(0)
     cert.gmtime_adj_notAfter(5*365*24*60*60)
