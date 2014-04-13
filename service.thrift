@@ -7,5 +7,5 @@ service RPCClientServer
 
 service NodeChatter
 {
-	void verify(1:string a),
+	void verify(1:string a, 2:string model),
 }

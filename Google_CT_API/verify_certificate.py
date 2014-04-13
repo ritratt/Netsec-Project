@@ -38,7 +38,7 @@ def verifyCertificate(ctserverurl, certificate, timestamp):
 
     constructed_leaf = createMerkleTreeLeaf(sct_timestamp,cert_to_lookup.to_der())
     leaf_hash = merkle.TreeHasher().hash_leaf(constructed_leaf)
-        
+    print leaf_hash    
     #If exception thrown return false, else return true
     
     proofFound = True

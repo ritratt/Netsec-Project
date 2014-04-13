@@ -65,7 +65,7 @@ if __name__=='__main__':
 			
 			if argv[2] in ['s','c']:
 				client.receiveReq(nodeName)
-				print "Node receiving its certificate from CA."
+				print "Node receiving it's certificate from CA."
 				msg = client.sendCert()
 				open("%s.pem"%nodeName, "wt").write(msg)
 			
@@ -116,4 +116,4 @@ if __name__=='__main__':
 		transport.close()
 
 	else:
-		print "Invalid args!"
+		print "Invalid args's!"

@@ -50,7 +50,7 @@ def verifyCertificate(ctserverurl, certificate, timestamp):
     return proofFound
 
 def retrieveTimestampFromMap(weburl):
-    timestampMap = {'https://www.bankofamerica.com': 1393154605605}
+    timestampMap = {'https://www.bankofamerica.com': 1393154605606}
     return timestampMap[weburl]
 
 #Main
