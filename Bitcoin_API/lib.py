@@ -24,7 +24,8 @@ def absence(pseudonym, CA_addr):
 	txns = json_response['txs'][0]['inputs'][0]['prev_out']['addr']
 	
 
-def verification(btc_amount, CA_Addr, Client_addr):
+#Returns a set of transaction ids from CA to Client with given btc amount.
+def retrieve(btc_amount, CA_Addr, Client_addr):
 	ids = []
 	url = 'http://blockchain.info/address/' + CA_addr + '?format=json'
         raw_response = urllib2.urlopen(url).read()
@@ -32,7 +33,7 @@ def verification(btc_amount, CA_Addr, Client_addr):
 
 	txs = json_response['txs']
 	for tx in txs:
-		if(tx['inputs'][0]['prev_out']['addr'] == CA_Addr) and (tx['inputs'][0]['out'] == Client_addr) and tx['inputs'][0]['prev_out']['value'] == btc_amount):
+		if((tx['inputs'][0]['prev_out']['addr'] == CA_Addr) and (tx['inputs'][0]['out'] == Client_addr) and (tx['inputs'][0]['prev_out']['value'] == btc_amount)):
 			ids.append(tx['hash']
 	return ids
 
@@ -50,3 +51,27 @@ def validate(version = 0, pubkey, addr_input):
     else:
         print 'Given public key and address do not match!'
 	return False
+
+#Function that returns the first public key out of the multiple keys issued by CA to Client.
+def currency(pseudonym, CA_Addr):
+	h = md5.sha512()
+	h.update(pseudonym)
+	btc_amount = h
+	
+	url = 'http://blockchain.info/address/' + CA_addr + '?format=json'
+        raw_response = urllib2.urlopen(url).read()
+        json_response = json.loads(raw_response)
+
+        txs = json_response['txs']
+	earliest = txs[0]['time']
+        for tx in txs:
+                if(tx['inputs'][0]['prev_out']['addr'] == CA_Addr) and tx['inputs'][0]['prev_out']['value'] == btc_amount and tx['time'] < earliest):
+			earliest = tx['time']
+			index = tx['tx_index']
+	url_txindex = 'http://blockchain.info/tx-index/' + index + '?format=json'
+	resp = json.loads(urllib2.urlopen(url_txindex).read())
+	
+	first_addr = resp['out'][0]['addr']
+	return first_addr
+	
+
