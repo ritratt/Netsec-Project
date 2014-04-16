@@ -1,0 +1,16 @@
+The following libraries are needed
+
+json
+requests
+sqllite
+gflags
+
+The following change needs to be made to Makefile in the python folder.
+
+protoc $^ -I/usr/include/ -I. -I/usr/local/include --python_out=.
+
+Steps
+1.export PYTHONPATH=$PYTHONPATH:<installation_folder>/python/
+2. Run the makefile in the python folder
+2. Use the tools in the installation folder
+

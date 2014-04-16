@@ -1,0 +1,68 @@
+import struct
+import sys
+
+from ct.client import log_client
+from ct.client import tls_message
+from ct.crypto import cert
+from ct.crypto import merkle
+from ct.proto import client_pb2
+from ct.proto import ct_pb2
+
+import gflags
+
+FLAGS = gflags.FLAGS
+
+gflags.DEFINE_string("certificate", None, "Certificate file (PEM format)")
+gflags.DEFINE_string("timestamp", None, "Timestamp from SCT of given certificate.")
+gflags.DEFINE_string("ctserverurl", "ct.googleapis.com/pilot","URL of CT log Server")
+
+#Function: Creates a Merkle Tree Leaf
+#Params: timestamp  - Timestamp provided in the SCT for the certificate
+#Params: x509_cert_bytes - Certificate Bytes for PEM certificate
+#Returns: Merkle tree hash
+def createMerkleTreeLeaf(timestamp, x509_cert_bytes):
+    leaf = client_pb2.MerkleTreeLeaf()
+    leaf.version = client_pb2.V1
+    leaf.leaf_type = client_pb2.TIMESTAMPED_ENTRY
+    leaf.timestamped_entry.timestamp = timestamp
+    leaf.timestamped_entry.entry_type = client_pb2.X509_ENTRY
+    leaf.timestamped_entry.asn1_cert = x509_cert_bytes
+    return tls_message.encode(leaf)
+
+def verifyCertificate(ctserverurl, certificate, timestamp):    
+    client = log_client.LogClient(ctserverurl)
+    sth = client.get_sth()
+    
+    cert_to_lookup = cert.Certificate.from_pem_file(certificate)
+    sct_timestamp = int(timestamp)
+
+    constructed_leaf = createMerkleTreeLeaf(sct_timestamp,cert_to_lookup.to_der())
+    leaf_hash = merkle.TreeHasher().hash_leaf(constructed_leaf)
+        
+    #If exception thrown return false, else return true
+    
+    proofFound = True
+    try:        
+        proof_from_hash = client.get_proof_by_hash(leaf_hash, sth.tree_size)
+    except Exception:
+        proofFound = False
+        
+    return proofFound
+
+def retrieveTimestampFromMap(weburl):
+    timestampMap = {'https://www.bankofamerica.com': 1393154605606}
+    return timestampMap[weburl]
+
+#Main
+if __name__ == '__main__':
+    sys.argv = FLAGS(sys.argv)
+    
+    timestamp = retrieveTimestampFromMap('https://www.bankofamerica.com')
+    proofFound = verifyCertificate(FLAGS.ctserverurl, FLAGS.certificate, timestamp)
+    
+    if proofFound:
+        print "Certificate is in Log"
+    else:
+        print "Certificate is not in Log"
+
+#Usage: python verify_certificate.py --certificate boa.pem --timestamp 1393154605606

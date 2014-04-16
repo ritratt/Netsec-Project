@@ -1,0 +1,17 @@
+The following flags are 
+
+sqllite
+patch verify_single_proof.py
+pip install "PyOpenSSL>=0.13"
+
+rm -r /usr/lib/python2.7/dist-packages/OpenSSL
+export PYTHONPATH=$PYTHONPATH:/media/Gatech/certificate-transparency/src/python/
+pip install gflags
+
+protoc $^ -I/usr/include/ -I. -I/usr/local/include --python_out=.
+
+pip install requests
+cmake
+svn checkout http://protobuf.googlecode.com/svn/trunk/ protobuf-read-only
+Put _init_.py in all subfolders
+
