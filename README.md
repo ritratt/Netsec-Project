@@ -70,7 +70,8 @@ Using this suite, it is possible to simulate certificate verification using the 
 
 ###How to run(change cwd to gen-py)
 1. Change your permissions to root using sudo
-1. export PYTHONPATH=$PYTHONPATH:/path-to-/installation-dir/certificate-transparency/src/python-folder
+    `export PYTHONPATH=$PYTHONPATH:/path-to-/installation-dir/certificate-transparency/src/python-folder`
+
 Terminal 1. You need to have the CA live, primarily:
 
 `python certificateAuthority.py`
@@ -93,7 +94,7 @@ In order to see the outcome of verification, check the o/p on server's bash (i.e
 The setup instructions is the same as listed in the previous section.
 Navigate to the Google_CT_API folder. Change permissions to root. Run the following command.
 
-	`export PYTHONPATH=$PYTHONPATH:/path-to-/installation-dir/certificate-transparency/src/python-folder` 
+    `export PYTHONPATH=$PYTHONPATH:/path-to-/installation-dir/certificate-transparency/src/python-folder` 
 
 1. Addition of a certificate to the certificate transparency log
 

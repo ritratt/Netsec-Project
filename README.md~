@@ -91,7 +91,10 @@ In order to see the outcome of verification, check the o/p on server's bash (i.e
 
 ###Additional Google CT Utilities
 The setup instructions is the same as listed in the previous section.
-Navigate to the Google_CT_API folder. 
+Navigate to the Google_CT_API folder. Change permissions to root. Run the following command.
+
+	`export PYTHONPATH=$PYTHONPATH:/path-to-/installation-dir/certificate-transparency/src/python-folder` 
+
 1. Addition of a certificate to the certificate transparency log
 
     The sample certificates have already been placed in the folder. If you wish to add your own trusted certificate to the log, run the following command, replacing the certificate file paths with your own. The order of the certificate PEM files from left to right, must be listed as the end-entity certificate at the beginning, the ICA chain certificate and the root certificate in the end. The SCT timestamp is returned to you as a result.
