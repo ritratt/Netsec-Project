@@ -145,16 +145,16 @@ def gen_eckey(passphrase=None, secret=None, pkey=None, compressed=False, rounds=
 
 def get_addr(k,version=0):
     pubkey = k.get_pubkey()
-    print base64.b64encode(pubkey)
-    pkey = base58_check_encode(pubkey, 128+version)
     secret = k.get_secret()
     hash160 = rhash(pubkey)
     addr = base58_check_encode(hash160,version)
     payload = secret
     if k.compressed:
         payload = secret + chr(1)
-    
-    return addr, pkey,
+    skey = base58_check_encode(payload, 128+version)
+    payload = pubkey
+    pkey = base58_check_encode(payload, 128+version)
+    return pkey, skey, addr
 
 def reencode(pkey,version=0):
     payload = base58_check_decode(pkey,128+version)

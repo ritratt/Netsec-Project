@@ -145,6 +145,7 @@ def gen_eckey(passphrase=None, secret=None, pkey=None, compressed=False, rounds=
 
 def get_addr(k,version=0):
     pubkey = k.get_pubkey()
+    #print 'Original is \n ' + pubkey
     secret = k.get_secret()
     hash160 = rhash(pubkey)
     addr = base58_check_encode(hash160,version)
