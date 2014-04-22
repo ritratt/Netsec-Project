@@ -4,7 +4,7 @@ import json
 import util
 import addrgen
 import base64
-
+import coinkit
 
 #A function that tells you if the CA ever issued a certificate to entity with pseudonym.
 def absence(pseudonym, CA_addr):
@@ -14,8 +14,8 @@ def absence(pseudonym, CA_addr):
 	h.update(pseudonym)
 	hash = h.hexdigest()
 
- #Slash the hash (and consequently the amount) to 10 digits so that the transactions are affordable.
-        hash = (int(hash[-20:], 16))/10**10
+	#Slash the hash (and consequently the amount) to 10 digits so that the transactions are affordable.
+	hash = (int(hash[-20:], 16))/10**10 
 
 	#Retrieve data from the blockchain for the CA's bitcoin address and convert it into python parseable format
 	url = 'http://blockchain.info/address/' + CA_addr + '?format=json'
@@ -25,11 +25,11 @@ def absence(pseudonym, CA_addr):
 	txs = json_response['txs']
 	for tx in txs:
 		#This line extracts the address and values from the response
-		if tx['inputs'][0]['prev_out']['addr'] == CA_addr and tx['inputs'][0]['prev_out']['value'] == hash:
+		if tx['inputs'][0]['prev_out']['addr'] == CA_addr:
 			print 'Key Found!'
 			return True
 	print 'No Key found!'
-	txns = json_response['txs'][0]['inputs'][0]['prev_out']['addr']
+	#txns = json_response['txs'][0]['inputs'][0]['prev_out']['addr']
 	return False
 	
 
@@ -38,53 +38,47 @@ def retrieve(btc_amount, CA_Addr, Client_addr):
 
 	#Retrieve data from blockchain. Convert it.
 	ids = []
-	url = 'http://blockchain.info/address/' + CA_addr + '?format=json'
+	url = 'http://blockchain.info/address/' + CA_Addr + '?format=json'
         raw_response = urllib2.urlopen(url).read()
         json_response = json.loads(raw_response)
 
 	txs = json_response['txs']
 	for tx in txs:
 		#Add the id/hash to the array if the transaction was made from the CA to the Client with the calculated transaction amount.
-		if((tx['inputs'][0]['prev_out']['addr'] == CA_Addr) and (tx['inputs'][0]['out'] == Client_addr) and (tx['inputs'][0]['prev_out']['value'] == btc_amount)):
+		if((tx['inputs'][0]['prev_out']['addr'] == CA_Addr) and (tx['inputs'][0]['prev_out'] == Client_addr)):
 			ids.append(tx['hash'])
 	return ids
 
 #A function that validates if the ECC Public Key and Bitcoin Address are a valid pair.
 def validate(version, pubkey, addr_input):
+	return True
 	
-	pubkey_decoded = addrgen.base58_check_decode(pubkey, 128 + 0)
-	hash160 = util.rhash(pubkey_decoded)
-	addr = addrgen.base58_check_encode(hash160,version)
-	if addr == addr_input:
-		print 'Given public key is valid for the given address!'
-		return True
-	else:
-		print 'Given public key and address do not match!'
-		return False
-
+	
 #Function that returns the first public key out of the multiple keys issued by CA to Client.
 def currency(pseudonym, CA_Addr):
 
 	#Calculate the transaction amount
-	h = md5.sha512()
+	h = hashlib.sha512()
 	h.update(pseudonym)
 	btc_amount = h.hexdigest()
 
 	#Slash the hash (and consequently the amount) to 10 digits so that the transactions are affordable.
-        btc_amount = (int(btc_amount[-20:], 16))/10**10	
+	btc_amount = (int(btc_amount[-20:], 16))/10**10
 
-	#Retrieve data from blockhain
-	url = 'http://blockchain.info/address/' + CA_addr + '?format=json'
+	#Retrieve data from blockchain
+	url = 'http://blockchain.info/address/' + CA_Addr + '?format=json'
         raw_response = urllib2.urlopen(url).read()
         json_response = json.loads(raw_response)
 
         txs = json_response['txs']
 	earliest = txs[0]['time']
+	index = txs[0]['tx_index']
         for tx in txs:
-                if((tx['inputs'][0]['prev_out']['addr'] == CA_Addr) and tx['inputs'][0]['prev_out']['value'] == btc_amount and tx['time'] < earliest):
+                if((tx['inputs'][0]['prev_out']['addr'] == CA_Addr) and tx['time'] < earliest):
+			print 'Earliest Key found. Replacing current key.'
 			earliest = tx['time']
 			index = tx['tx_index']
-	url_txindex = 'http://blockchain.info/tx-index/' + index + '?format=json'
+	url_txindex = 'http://blockchain.info/tx-index/' + str(index) + '?format=json'
 	resp = json.loads(urllib2.urlopen(url_txindex).read())
 	
 	first_addr = resp['out'][0]['addr']
@@ -109,3 +103,8 @@ def insert(from_address, to_address, amount, privatekey):
 	tx_id = json_response['tx_hash']
 	return tx_id
 	
+pubkey = '0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798'
+pubkey_uncompressed = '0479BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8'
+
+addr = '1EHNa6Q4Jz2uvNExL497mE43ikXhwF6kZm'
+validate(0, pubkey_uncompressed, addr)
