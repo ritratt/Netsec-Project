@@ -53,6 +53,7 @@ def createMerkleTreeLeaf(timestamp, x509_cert_bytes):
 	return tls_message.encode(leaf)
         
 def retrieveTimestampFromMap(commonName):
+    print commonName 	
     timestampMap = {'www.bankofamerica.com': 1393154605606}
     return timestampMap[commonName] if commonName in timestampMap else 0
 	
@@ -62,8 +63,9 @@ def verifyCertInGoogleCTLog(a):
     from ct.crypto import cert,merkle
 
     open("temp.pem", "wt").write(a)
-    tempCert=crypto.load_certificate(crypto.FILETYPE_PEM, open('temp.pem', 'rb').read())
+    tempCert=ct.crypto.load_certificate(ct.crypto.FILETYPE_PEM, open('temp.pem', 'rb').read())
 
+    print tempCert.get_subject().commonName
     timestamp = retrieveTimestampFromMap(tempCert.get_subject().commonName)
 
     if timestamp == 0:
@@ -76,6 +78,7 @@ def verifyCertInGoogleCTLog(a):
     constructed_leaf = createMerkleTreeLeaf(timestamp,cert_to_lookup.to_der())
     leaf_hash = merkle.TreeHasher().hash_leaf(constructed_leaf)
 
+    print leaf_hash	
     #TODO: Read from properties file
     verificationserverurl="ct.googleapis.com/pilot"
     revocationserverurl="ct.googleapis.com/aviator"
@@ -96,6 +99,7 @@ def verifyCertInGoogleCTLog(a):
             proof_from_hash = verificationclient.get_proof_by_hash(leaf_hash, verification_sth.tree_size)
             print "Certificate verified in the Google CT Log"
         except Exception as e:
+	    print str(e)	
             print "Certificate not verified"
 
 class NodeHandler:
