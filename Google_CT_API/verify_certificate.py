@@ -37,8 +37,7 @@ def verifyCertificate(ctserverurl, certificate, timestamp):
     sct_timestamp = int(timestamp)
 
     constructed_leaf = createMerkleTreeLeaf(sct_timestamp,cert_to_lookup.to_der())
-    leaf_hash = merkle.TreeHasher().hash_leaf(constructed_leaf)
-    print leaf_hash    
+    leaf_hash = merkle.TreeHasher().hash_leaf(constructed_leaf)    
     #If exception thrown return false, else return true
     
     proofFound = True
@@ -57,8 +56,8 @@ def retrieveTimestampFromMap(weburl):
 if __name__ == '__main__':
     sys.argv = FLAGS(sys.argv)
     
-    timestamp = retrieveTimestampFromMap('https://www.bankofamerica.com')
-    proofFound = verifyCertificate(FLAGS.ctserverurl, FLAGS.certificate, timestamp)
+    '''timestamp = retrieveTimestampFromMap('https://www.bankofamerica.com')'''
+    proofFound = verifyCertificate(FLAGS.ctserverurl, FLAGS.certificate, FLAGS.timestamp)
     
     if proofFound:
         print "Certificate is in Log"

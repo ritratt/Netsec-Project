@@ -70,8 +70,7 @@ Using this suite, it is possible to simulate certificate verification using the 
 
 ###How to run(change cwd to gen-py)
 1. Change your permissions to root using sudo
-
-        `export PYTHONPATH=$PYTHONPATH:/path-to-/installation-dir/certificate-transparency/src/python-folder`
+    `export PYTHONPATH=$PYTHONPATH:/path-to-/installation-dir/certificate-transparency/src/python-folder`
 
 Terminal 1. You need to have the CA live, primarily:
 
