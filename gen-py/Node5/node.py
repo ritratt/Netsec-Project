@@ -18,6 +18,8 @@ from OpenSSL import crypto
 import struct
 import sys
 
+import BitcoinTest
+
 '''@brief - Create Self Signed Certificate
    @param y - Common Name
    @returns none
@@ -151,6 +153,9 @@ class NodeHandler:
 
 		elif model == 'GoogleCT':
 			verifyCertInGoogleCTLog(self,a)
+
+		elif model == 'BitcoinCT':
+			BitcoinTest.main()
 
     		
 	
