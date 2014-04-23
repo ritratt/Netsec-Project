@@ -5,7 +5,7 @@ import json
 import addrgen
 
 #Used by CA to verify stuff and issue a certificate to the client
-def issue(pubkey, secretkey, address, pseudonym):
+def issue(pubkey, secretkey, from_address, pseudonym, to_address):
 
 	#Calculate the transaction amount by hashing the pseudonym.
 	h = hashlib.sha512()
