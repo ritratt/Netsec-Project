@@ -107,4 +107,38 @@ Navigate to the Google_CT_API folder. Change permissions to root. Run the follow
     The sample Bank of America certificate has already been placed in the folder. Run the following command. A 'Certificate is in Log' message should be output if the certificate was found in the log
     
         python verify_certificate.py --certificate boa.pem --timestamp 1393154605606
-    
+        
+        
+###Bitcoin Blockchain & Certificate Transparency
+We use the Bitcoin Blockchain to store certificates. We make API calls to the Blockchain to do the following operations:     <br>
+1. Insertion    <br>
+2. Absence      <br>
+3. Currency     <br>
+4. Verification <br>
+
+We created a library in Python that a user can make use of to set, get and verify certificates. This library has the following dependencies: <br>
+`1. json`         <br>
+`2. urllib2`      <br>
+`3. hashlib`      <br>
+`4. base64`       <br>
+`5. ctypes`       <br>
+The above are a part of the default Python distribution. Furthermore, we use open source code from multiple sources for achieving various other functions. They are: <br>
+1. https://github.com/weex/addrgen <br>
+2. https://github.com/onenameio/coinkit
+
+####Sample Usage:
+`#Create certificate`   <br>
+`Alice_Certificate = issue(Alice_Pubkey, CA_Secretkey, CA_address, Alice_pseudonym, Alice_address)`     <br>
+`#Alice presents Alice_Certificate to Bob. Bob verifies it and uses it.`        <br>
+`Validity = use_certificate(Alice_Certificate)` <br>
+<br>
+If valid, Bob can go ahead and use the public key from the certificate to encrypt future functions.
+<br>
+###Running tests:
+There is an existing test written that tests the following test cases:  <br>
+1. Validating an existing valid certificate     <br>
+2. Validating an existing invalid certificate   <br>
+3. Validating an non-existent certificate       <br>
+<br>
+To run the test: <br>
+`python Node5.py Alice c BitcoinCT`
