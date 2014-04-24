@@ -107,7 +107,9 @@ Navigate to the Google_CT_API folder. Change permissions to root. Run the follow
     The sample Bank of America certificate has already been placed in the folder. Run the following command. A 'Certificate is in Log' message should be output if the certificate was found in the log
     
         python verify_certificate.py --certificate boa.pem --timestamp 1393154605606
-        
+
+####Acknowledgements
+The Google CT code utilized the open source code shared by Google Certificate Transparency Project.
         
 ###Bitcoin Blockchain & Certificate Transparency
 We use the Bitcoin Blockchain to store certificates. We make API calls to the Blockchain to do the following operations:     <br>
@@ -128,9 +130,11 @@ The above are a part of the default Python distribution. Furthermore, we use ope
 
 ####Sample Usage:
 `#Create certificate`   <br>
-`Alice_Certificate = issue(Alice_Pubkey, CA_Secretkey, CA_address, Alice_pseudonym, Alice_address)`     <br>
+
+    `Alice_Certificate = issue(Alice_Pubkey, CA_Secretkey, CA_address, Alice_pseudonym, Alice_address)`     <br>
 `#Alice presents Alice_Certificate to Bob. Bob verifies it and uses it.`        <br>
-`Validity = use_certificate(Alice_Certificate)` <br>
+
+    `Validity = use_certificate(Alice_Certificate)` <br>
 <br>
 If valid, Bob can go ahead and use the public key from the certificate to encrypt future functions.
 <br>
@@ -141,4 +145,11 @@ There is an existing test written that tests the following test cases:  <br>
 3. Validating an non-existent certificate       <br>
 <br>
 To run the test: <br>
-`python Node5.py Alice c BitcoinCT`
+Navigate to the gen-py/Node3 folder.
+
+    `python node.py Alice c BitcoinCT`
+    
+Alternatively, to run the tests locally. 
+
+    `python Bitcoin_API/test/test.py`
+ 

@@ -13,11 +13,22 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from os.path import isfile
-from os import system
-from OpenSSL import crypto
 from random import randint
+from OpenSSL import crypto
+import struct
+import sys
 
+import BitcoinTest
+
+'''@file node.py'''
+
+'''@brief - Create Self Signed Certificate
+   @param y - Common Name
+   @returns none
+'''
 def create_self_signed_cert(y):
+
+    from OpenSSL import crypto
 
     k = crypto.PKey()
     k.generate_key(crypto.TYPE_RSA, 1024)
@@ -26,10 +37,10 @@ def create_self_signed_cert(y):
     cert.get_subject().C = "US"
     cert.get_subject().ST = "GA"
     cert.get_subject().L = "ATL"
-    cert.get_subject().O = "blah"
-    cert.get_subject().OU = "blah"
+    cert.get_subject().O = "org"
+    cert.get_subject().OU = "organizationUnit"
     cert.get_subject().CN = y
-    cert.set_serial_number(randint(1,5000))
+    cert.set_serial_number(1000)
     cert.gmtime_adj_notBefore(0)
     cert.gmtime_adj_notAfter(5*365*24*60*60)
     cert.set_issuer(cert.get_subject())
@@ -38,10 +49,15 @@ def create_self_signed_cert(y):
 
     open("%s.pem"%y, "wt").write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
 
+'''@brief - Create Merkle Tree Leaf
+   @param - timestamp - Timestamp
+   @param - x509_cert_bytes - X509 Certificate Bytes
+'''
 def createMerkleTreeLeaf(timestamp, x509_cert_bytes):
 
 	from ct.client import tls_message
-	from ct.proto import client_pb2,ct_pb2
+	from ct.proto import client_pb2
+	from ct.proto import ct_pb2
 
 	leaf = client_pb2.MerkleTreeLeaf()
 	leaf.version = client_pb2.V1
@@ -51,77 +67,102 @@ def createMerkleTreeLeaf(timestamp, x509_cert_bytes):
 	leaf.timestamped_entry.asn1_cert = x509_cert_bytes
 
 	return tls_message.encode(leaf)
-        
+
+'''@brief - Retrieve Timestamp from Map
+   @param - commonName
+   @returns - SCT timestamp'''
 def retrieveTimestampFromMap(commonName):
     timestampMap = {'www.bankofamerica.com': 1393154605606}
-    return timestampMap[commonName] if commonName in timestampMap else 0
-	
-def verifyCertInGoogleCTLog(a):
-
-    from ct.client import log_client
-    from ct.crypto import cert,merkle
-
-    open("temp.pem", "wt").write(a)
-    tempCert=crypto.load_certificate(crypto.FILETYPE_PEM, open('temp.pem', 'rb').read())
-
-    timestamp = retrieveTimestampFromMap(tempCert.get_subject().commonName)
-
-    if timestamp == 0:
-        print 'SCT Timestamp not specified in Certificate'
-        system('rm temp.pem')
-        return
-
-    cert_to_lookup = cert.Certificate.from_pem_file('temp.pem')
-    system('rm temp.pem')
-    constructed_leaf = createMerkleTreeLeaf(timestamp,cert_to_lookup.to_der())
-    leaf_hash = merkle.TreeHasher().hash_leaf(constructed_leaf)
-
-    #TODO: Read from properties file
-    verificationserverurl="ct.googleapis.com/pilot"
-    revocationserverurl="ct.googleapis.com/aviator"
-
-    verificationclient = log_client.LogClient(verificationserverurl)
-    revocationclient = log_client.LogClient(revocationserverurl)
-
-    revocation_sth = revocationclient.get_sth()
-
-    try:
-        proof_from_hash = revocationclient.get_proof_by_hash(leaf_hash, revocation_sth.tree_size)
-        print "Certificate has been revoked"
-    except Exception:
-        print "Certificate is not revoked. Checking validity"
-        verification_sth = verificationclient.get_sth()
-        #If exception thrown return false, else return true
-        try:
-            proof_from_hash = verificationclient.get_proof_by_hash(leaf_hash, verification_sth.tree_size)
-            print "Certificate verified in the Google CT Log"
-        except Exception as e:
-            print "Certificate not verified"
-
-class NodeHandler:
-    def __init__(self):
-        pass
-
-    def verify(self,a,model):
-
-        if model == 'PKI':
-            print '------------------------------------------------------'
-            open("temp.pem", "wt").write(a)
-            tempCert=crypto.load_certificate(crypto.FILETYPE_PEM,open('temp.pem','rb').read())
-            system('mv temp.pem %s.pem'%tempCert.get_subject().commonName)
-            print "Received client's cert"
-            system('openssl verify -CAfile CA_cert.pem %s.pem'%tempCert.get_subject().commonName)
-            system('rm %s.pem'%tempCert.get_subject().commonName)
-            print '------------------------------------------------------','\n'
-
-        elif model == 'GoogleCT':
-            verifyCertInGoogleCTLog(a)
-
-        else:
-            print 'Invalid method name!!'
-
-if __name__=='__main__':
+    timestamp = 0
     
+    try:	
+        timestamp = timestampMap[commonName]
+    except KeyError:
+        timestamp = 0
+        
+    return timestamp
+
+'''@brief - Verify Certificate Presence in Google CT Log
+   @param - Self
+   @param - a - Certificate Raw Bytes
+   @returns - none''' 
+def verifyCertInGoogleCTLog(self,a):
+
+	print '--------------------------------------------'
+	from ct.client import log_client
+	from ct.crypto import cert
+	from ct.crypto import merkle
+	from OpenSSL import crypto
+
+	
+	open("temp.pem", "wt").write(a)
+	tempCert=crypto.load_certificate(crypto.FILETYPE_PEM, open('temp.pem', 'rb').read())
+
+	timestamp = retrieveTimestampFromMap(tempCert.get_subject().commonName)
+	
+	'''if timestamp == 0:
+		print 'SCT Timestamp not specified in Certificate'
+		print '-------------------------------------------'
+		return
+	'''
+
+	cert_to_lookup = cert.Certificate.from_pem_file('temp.pem')
+    	constructed_leaf = createMerkleTreeLeaf(timestamp,cert_to_lookup.to_der())
+    	leaf_hash = merkle.TreeHasher().hash_leaf(constructed_leaf)
+
+        verificationserverurl="ct.googleapis.com/pilot"
+        revocationserverurl="ct.googleapis.com/aviator"
+	
+        verificationclient = log_client.LogClient(verificationserverurl)
+	revocationclient = log_client.LogClient(revocationserverurl)
+
+	revocation_sth = revocationclient.get_sth()
+	
+	try:
+		proof_from_hash = revocationclient.get_proof_by_hash(leaf_hash, revocation_sth.tree_size)
+		print "Certificate has been revoked"
+		return
+	except Exception:
+		print "Certificate is not revoked. Checking validity"
+        
+	verification_sth = verificationclient.get_sth()
+         
+    	#If exception thrown return false, else return true
+    	try:
+        	proof_from_hash = verificationclient.get_proof_by_hash(leaf_hash, verification_sth.tree_size)
+                print "Certificate verified in the Google CT Log"
+    	except Exception as e:
+                print "Certificate not verified"
+	print '----------------------------------------------------'
+	
+class NodeHandler:
+	def __init__(self):
+		pass
+
+	def verify(self,a,model):
+
+		'''If Verification Model is PKI, Verify the Certificate Chain'''
+		if model == 'PKI':
+			from os import system
+			print '------------------------------------------------------'
+			open("temp.pem", "wt").write(a)
+			tempCert=crypto.load_certificate(crypto.FILETYPE_PEM,open('temp.pem','rb').read())
+			system('mv temp.pem %s.pem'%tempCert.get_subject().commonName)
+			print "Received client's cert"
+			system('openssl verify -verbose -CAfile CA_cert.pem %s.pem'%tempCert.get_subject().commonName)
+			system('rm %s.pem'%tempCert.get_subject().commonName)
+			print '------------------------------------------------------','\n'
+
+		elif model == 'GoogleCT':
+			verifyCertInGoogleCTLog(self,a)
+
+		elif model == 'BitcoinCT':
+			BitcoinTest.main()
+
+    		
+	
+if __name__=='__main__':
+
     nodeName=argv[1]
     
     if argv[2]=='s' and len(argv)==3:
@@ -229,5 +270,3 @@ if __name__=='__main__':
     else:
         print "Invalid number/type of option(s) passed!"
 
-#TODO: Clean up and Comment
-#TODO: Revocation
